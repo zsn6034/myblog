@@ -1,5 +1,5 @@
 <template>
-  <footer>wqwqwq</footer>
+  <footer>zsn</footer>
 </template>
 <style scoped>
 footer {

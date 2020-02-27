@@ -32,7 +32,7 @@ module.exports = {
       var sql = sqlMap.setValue;
       connection.query(sql, [name, id], (err, result) => {
         res.json(result);
-        connection.release();//归还资源 
+        connection.release();//归还资源
       })
     })
   },
@@ -173,8 +173,8 @@ module.exports = {
   // 上传图片
   uploadPic(req, res, next) {
     let file = req.file,
-      url = '/api/upload/' + file.filename;  
-      // 'http://' + req.headers.host + 
+      url = '/api/upload/' + file.filename;
+      // 'http://' + req.headers.host +
     res.send({ resultCode: '1', url });
   },
   // 读取图片
@@ -184,8 +184,8 @@ module.exports = {
   // 新增文章
   addArticle(req, res, next) {
     pool.getConnection((err, connection) => {
-      let postData = req.body,
-        creat_at = new Date().getTime(),
+      let postData = req.body;
+        creat_at = new Date().getTime();
         title = postData.title;
       connection.query(sqlMap.article.queryByTitle, [title], (err, result) => {
         if (result.length > 0) {
@@ -197,6 +197,7 @@ module.exports = {
         } else {
           connection.query(sqlMap.article.insert, [postData.username, title, postData.content, postData.html, postData.tags, creat_at, 0, 0, postData.state], (err, result) => {
             if (err !== null) {
+              console.log(err)
               res.json({
                 status: false,
                 msg: '添加失败',

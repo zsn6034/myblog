@@ -2,7 +2,8 @@
   <section>
     <Header></Header>
     <section class="blog-body">
-      <p v-if="flag==0" class="nothing">Nothing</p>
+      <!-- <p v-if="flag==0" class="nothing">Nothing</p> -->
+      <p v-if="!articleList || articleList.length === 0" class="nothing">Nothing</p>
       <div v-else class="blog-list">
         <ul class="list-article">
           <li class="article" v-for="(article,index) in articleList" :key="article.id">
@@ -56,7 +57,7 @@ export default {
     return {
       articleList: [],
       tags: [],
-      flag: 0,
+      // flag: 0,
       pageNum: 1,
       pageSize: 5,
       count: 0
@@ -84,7 +85,7 @@ export default {
         .then(response => {
           this.articleList = response.data[0];
           this.count = response.data[1][0].count;
-          this.flag = this.articleList.length < 1 ? 0 : 1;
+          // this.flag = this.articleList.length < 1 ? 0 : 1;
           for (let item of this.articleList) {
             let str = item.type
               .substring(1, item.type.length - 1)
