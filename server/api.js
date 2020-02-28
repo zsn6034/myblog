@@ -226,7 +226,7 @@ module.exports = {
         connection.query(sqlMap.article.queryAllBysu, [postData.state, postData.username, start, end], (err, result) => {
           res.json(result);
         })
-      } else if (postData.pageNum == undefined) {
+      } else if (postData.pageNum === undefined) {
         connection.query(sqlMap.article.queryAllBySU, [postData.state, postData.username], (err, result) => {
           res.json(result);
         })
@@ -244,9 +244,9 @@ module.exports = {
       let postData = req.body;
       connection.query(sqlMap.article.updateViewCount, [postData.view, postData.count, postData.id], (err, result) => {
         res.send('ok');
+        connection.release();
       })
     })
-    connection.release()
   },
   //改变文章状态
   updateArticle(req, res, next) {
