@@ -3,7 +3,7 @@
     <el-row style="width:100%">
       <el-col :span="4" :offset="4">
         <h1 class="header-title">
-          <router-link to="/">StarBlog</router-link>
+          <router-link to="/admin/index">StarBlog</router-link>
         </h1>
       </el-col>
       <el-col :span="4" :offset="2">

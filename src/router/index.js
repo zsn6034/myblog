@@ -41,6 +41,22 @@ export default new Router({
       component: resolve => require(['@/components/admin/Admin'], resolve),
       children: [
         {
+          path: 'index',
+          name: 'index',
+          meta: {
+            requireAuth: true,  
+          },
+          component: resolve => require(['@/components/admin/Index'], resolve)
+        },
+        {
+          path: 'contents',
+          name: 'contents',
+          meta: {
+            requireAuth: true,  
+          },
+          component: resolve => require(['@/components/admin/Contents'], resolve)
+        },
+        {
           path: 'newEssay',
           name: 'newEssay',
           meta: {
