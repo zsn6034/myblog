@@ -6,10 +6,10 @@ const fs = require('fs');
 
 const createFolder = function(folder){
   try{
-      fs.accessSync(folder); 
+      fs.accessSync(folder);
   }catch(e){
       fs.mkdirSync(folder);
-  }  
+  }
 };
 const uploadFolder = './upload';
 createFolder(uploadFolder);
@@ -45,8 +45,8 @@ router.post('/userLogin',(req,res,next)=>{
   api.userLogin(req,res,next);
 })
 
-router.get('/admin/getArticleById',(req,res,next)=>{
-  api.getArticleById(req,res,next);
+router.get('/admin/getArticleByTagId',(req,res,next)=>{
+  api.getArticleByTagId(req,res,next);
 })
 
 router.get('/admin/getTagAll',(req,res,next)=>{

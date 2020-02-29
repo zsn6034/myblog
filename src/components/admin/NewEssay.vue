@@ -90,7 +90,8 @@ export default {
             title: this.title,
             content: this.context,
             html:html,
-            tags: JSON.stringify(this.tags),
+            // tags: JSON.stringify(this.tags),
+            tags: this.tags,
             state:1
           })
           .then(response => {
@@ -135,7 +136,8 @@ export default {
             title: this.title,
             content: this.context,
             html:html,
-            tags: JSON.stringify(this.tags),
+            // tags: JSON.stringify(this.tags),
+            tags: this.tags,
             state:0
           })
           .then(response => {

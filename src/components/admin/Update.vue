@@ -89,7 +89,7 @@ export default {
             id: this.draft.id,
             title: this.title,
             content: this.context,
-            tags: JSON.stringify(this.tags),
+            tags: this.tags,
             state: 1
           })
           .then(response => {
@@ -151,7 +151,7 @@ export default {
             username: this.username,
             title: this.title,
             content: this.context,
-            tags: JSON.stringify(this.tags),
+            tags: this.tags,
             state: 0
           })
           .then(response => {

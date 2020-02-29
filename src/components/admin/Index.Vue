@@ -82,11 +82,12 @@ export default {
           this.count = response.data[1][0].count;
           // this.flag = this.articleList.length < 1 ? 0 : 1;
           for (let item of this.articleList) {
-            let str = item.type
-              .substring(1, item.type.length - 1)
-              .replace(/\"/g, "");
-            let tag = str.split(",");
-            this.tags.push(tag);
+            // let str = item.type
+            //   .substring(1, item.type.length - 1)
+            //   .replace(/\"/g, "");
+            // let tag = str.split(",");
+            // this.tags.push(tag);
+            this.tags.push(item.tags.split(","));
           }
         })
         .catch(error => {

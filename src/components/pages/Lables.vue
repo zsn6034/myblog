@@ -32,6 +32,7 @@ export default {
       this.axios
       .get("/api/admin/getArticleById",{params:{id}})
       .then(response => {
+        congsole.log(id)
         this.$router.push({ path: "/", query: { articleList:response.data } });
       })
       .catch(error => {

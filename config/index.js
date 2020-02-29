@@ -34,12 +34,18 @@ module.exports = {
      */
 
     // https://webpack.js.org/configuration/devtool/#development
-    devtool: 'cheap-module-eval-source-map',
+    // 原配置
+    // devtool: 'cheap-module-eval-source-map',
+    // debug配置
+    devtool: 'source-map',
 
     // If you have problems debugging vue-files in devtools,
     // set this to false - it *may* help
     // https://vue-loader.vuejs.org/en/options.html#cachebusting
-    cacheBusting: true,
+    // 原配置
+    // cacheBusting: true,
+    // debug配置
+    cacheBusting: false,
 
     cssSourceMap: true
   },

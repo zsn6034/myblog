@@ -92,8 +92,7 @@ export default {
   },
   mounted() {
     this.draft = this.$route.query.article;
-    let str = this.draft.type.substring(1, this.draft.type.length - 1).replace(/\"/g, "");
-    this.tags = str.split(",");
+    this.tags = this.draft.tags.split(",");
   }
 };
 </script>

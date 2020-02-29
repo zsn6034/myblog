@@ -122,10 +122,7 @@ export default {
       this.islogin = true;
     }
     this.article = this.$route.query.article;
-    let str = this.article.type
-      .substring(1, this.article.type.length - 1)
-      .replace(/\"/g, "");
-    this.tags = str.split(",");
+    this.tags = this.article.tags.split(",");
     this.commentList = JSON.parse(this.article.comments) || [];
     this.axios
       .post("/api/updateCount", {
