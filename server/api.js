@@ -13,6 +13,33 @@ const pool = mysql.createPool({
   multipleStatements: true    // 多语句查询
 });
 
+function sendError(res, msg) {
+  console.log(msg)
+  res.json({
+    status: false,
+    msg: msg
+  })
+}
+
+function sendSuccess(res, msg) {
+  console.log(msg);
+  res.json({
+    status: true,
+    msg: msg
+  })
+}
+
+function disconnect(connection, err, res, msg) {
+  sendError(res, msg);
+  console.log(err);
+  connection.release();
+}
+
+function disconnectTrans(connection, err, res, msg) {
+  connection.rollback();
+  disconnect(connection, err, res, msg);
+}
+
 module.exports = {
 
   getValue(req, res, next) {
@@ -185,57 +212,30 @@ module.exports = {
   addArticle(req, res, next) {
     pool.getConnection((err, connection) => {
       let postData = req.body;
-        creat_at = new Date().getTime();
-        title = postData.title;
-      connection.query(sqlMap.article.queryByTitle, [title], (err, result) => {
-        if (result.length > 0) {
-          res.json({
-            status: false,
-            msg: '文章标题已存在',
-          });
-          connection.release();
-        } else {
-          connection.beginTransaction(function (err) {
+      let creat_at = new Date().getTime();
+      let title = postData.title;
+      connection.beginTransaction(function (err) {
+        if(err) {
+          disconnect(connection, err, res, '添加失败');
+          return;
+        }
+        // 1.先查articles表当前最大id+1
+        connection.query(sqlMap.article.queryMaxIdPlusOne, (err, result) => {
+          if(err){
+            disconnectTrans(connection, err, res, '添加失败');
+            return;
+          }
+          let newId = result[0].newId;
+          // 2.再插入article表
+          connection.query(sqlMap.article.insertNewArticle, [newId, postData.username, title, postData.content, postData.html, creat_at, 0, 0, postData.state], (err, result) => {
             if(err) {
-              console.log(err);
-              connection.release();
-              res.json({
-                status: false,
-                msg: '添加失败',
-              });
+              disconnectTrans(connection, err, res, '添加失败');
               return;
             }
-            connection.query(sqlMap.article.insertArticle, [postData.username, title, postData.content, postData.html, creat_at, 0, 0, postData.state], (err, result) => {
-              if(err){
-                console.log(err);
-                connection.rollback();
-                connection.release();
-                res.json({
-                  status: false,
-                  msg: '添加失败',
-                });
-                return;
-              }
-              insertArticleTagJoin(connection, title, postData.tags, 0, res); // 递归添加
-            })
+            // 3.最后插入article_type_join表(递归添加,这边的tags是标签id而不是名字)
+            insertArticleTagJoin(connection, newId, postData.tags, 0, res);
           })
-
-          // connection.query(sqlMap.article.insertArticle, [postData.username, title, postData.content, postData.html, postData.tags, creat_at, 0, 0, postData.state], (err, result) => {
-          //   if (err !== null) {
-          //     console.log(err)
-          //     res.json({
-          //       status: false,
-          //       msg: '添加失败',
-          //     });
-          //   } else {
-          //     res.json({
-          //       status: true,
-          //       msg: '添加成功',
-          //     });
-          //   }
-          //   connection.release();
-          // })
-        }
+        });
       })
     })
   },
@@ -297,96 +297,58 @@ module.exports = {
   updArticle(req, res, next) {
     pool.getConnection((err, connection) => {
       let postData = req.body;
-      // 1.查询oldTitle
-      connection.query(sqlMap.article.queryById1, [postData.id], (err, result) => {
-        if(err){
-          console.log(err);
-          connection.release();
-          res.json({
-            status: false,
-            msg: '编辑失败',
-          });
+      connection.beginTransaction(function (err) {
+        if(err) {
+          disconnectTrans(connection, err, res, '编辑失败');
           return;
         }
-        const oldTitle = result[0].title;
-        // 2.开启事务，修改articles表
-        connection.beginTransaction(function (err) {
-          if(err) {
-            console.log(err);
-            connection.release();
-            res.json({
-              status: false,
-              msg: '编辑失败',
-            });
+        // 1.先修改articles表
+        connection.query(sqlMap.article.updArticleById, [postData.state, postData.title, postData.content, postData.id], (err, result) => {
+          if(err){
+            disconnectTrans(connection, err, res, '编辑失败');
             return;
           }
-          connection.query(sqlMap.article.updArticleById, [postData.state, postData.title, postData.content, postData.id], (err, result) => {
-            if (err) {
-              console.log(err);
-              connection.rollback();
-              connection.release();
-              res.json({
-                status: false,
-                msg: '编辑失败',
-              });
+          // 2.再删除article_tag_join表
+          connection.query(sqlMap.article.delJoin, [postData.id], (err, result) => {
+            if(err){
+              disconnectTrans(connection, err, res, '编辑失败');
               return;
-            } else {
-              // 3. 删除oldTitle的article_tag_join表
-              connection.query(sqlMap.article.delArticleTagJoin, [oldTitle], (err, result) => {
-                if (err) {
-                  console.log(err);
-                  connection.rollback();
-                  connection.release();
-                  res.json({
-                    status: false,
-                    msg: '编辑失败',
-                  });
-                  return;
-                }else{
-                  // 4.插入新title到article_tag_join表(递归)
-                  insertArticleTagJoin(connection, postData.title, postData.tags, 0, res);
-                }
-              });
             }
-          });
+            // 3.最后添加article_type_join表(递归)
+            insertArticleTagJoin(connection, postData.id, postData.tags, 0, res);
+          })
         });
       });
-
-
-      // connection.query(sqlMap.article.updAllById, [postData.state, postData.title, postData.tags, postData.content, postData.id], (err, result) => {
-      //   if (err !== null) {
-      //     res.json({
-      //       status: false,
-      //       msg: '编辑失败',
-      //     });
-      //   } else {
-      //     res.json({
-      //       status: true,
-      //       msg: '编辑成功',
-      //     });
-      //   }
-      //   connection.release();
-      // })
     })
   },
   //删除文章
   delArticle(req, res, next) {
     pool.getConnection((err, connection) => {
       let postData = req.body;
-      connection.query(sqlMap.article.delById, [postData.id], (err, result) => {
-        if (err !== null) {
-          res.json({
-            status: false,
-            msg: '删除失败',
+      connection.beginTransaction(function (err) {
+        // 1.先删除article_type_join表
+        connection.query(sqlMap.article.delJoin, [postData.id], (err, result) => {
+          if(err) {
+            disconnectTrans(connection, err, res, '删除失败');
+            return;
+          }
+          // 2.再删除articles表
+          connection.query(sqlMap.article.delById, [postData.id], (err, result) => {
+            if(err) {
+              disconnectTrans(connection, err, res, '删除失败');
+              return;
+            }
+            connection.commit(function (err) {
+              if (err) {
+                disconnectTrans(connection, err, res, '删除失败');
+                return;
+              }
+              sendSuccess(res, '删除成功');
+              connection.release();
+            })
           });
-        } else {
-          res.json({
-            status: true,
-            msg: '删除成功',
-          });
-        }
-        connection.release();
-      })
+        })
+      });
     })
   },
   //添加评论
@@ -412,38 +374,23 @@ module.exports = {
   },
 }
 
-function insertArticleTagJoin(connection, title, tags, index, res) {
+function insertArticleTagJoin(connection, articleId, tags, index, res) {
   if(index === tags.length) {
     connection.commit(function (err) {
       if (err) {
-        console.log(err);
-        connection.rollback();
-        connection.release();
-        res.json({
-          status: false,
-          msg: '添加失败',
-        });
+        disconnectTrans(connection, err, res, '添加失败');
         return;
       }
-      res.json({
-        status: true,
-        msg: '添加成功',
-      });
+      sendSuccess(res, '添加成功');
       connection.release();
     })
   }else{
-    connection.query(sqlMap.article.insertArticleTagJoin, [title, tags[index]], (err, result) => {
+    connection.query(sqlMap.article.insertArticleTagJoin, [articleId, tags[index]], (err, result) => {
       if (err) {
-        console.log(err);
-        connection.rollback();
-        connection.release();
-        res.json({
-          status: false,
-          msg: '添加失败',
-        });
+        disconnectTrans(connection, err, res, '添加失败');
         return;
       }
-      insertArticleTagJoin(connection, title, tags, index + 1, res);
+      insertArticleTagJoin(connection, articleId, tags, index + 1, res);
     });
   }
 }

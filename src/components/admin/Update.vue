@@ -19,7 +19,7 @@
             placeholder="请选择标签"
             style="width:100%"
           >
-            <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.name"></el-option>
+            <el-option v-for="item in options" :key="item.id" :label="item.name" :value="item.id"></el-option>
           </el-select>
         </el-col>
         <el-col :span="6" :offset="2">
