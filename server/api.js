@@ -263,6 +263,16 @@ module.exports = {
       connection.release();
     })
   },
+  // 根据id获取对应article
+  getArticleById(req, res, next) {
+    pool.getConnection((err, connection) => {
+      let articleId = req.query.articleId
+      connection.query(sqlMap.article.queryById2, [articleId], (err, result) => {
+        res.json(result)
+      })
+      connection.release()
+    })
+  }, 
   // 阅读量、点赞量 +1
   addViewOrStart(req, res, next) {
     pool.getConnection((err, connection) => {

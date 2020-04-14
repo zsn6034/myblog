@@ -37,6 +37,10 @@ router.get('/getArticle', (req, res, next) => {
   api.getArticle(req, res, next);
 });
 
+router.get('/getArticleById', (req, res, next) => {
+  api.getArticleById(req, res, next);
+})
+
 router.post('/setUser',(req,res,next)=>{
   api.setUser(req,res,next);
 })
