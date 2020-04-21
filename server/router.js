@@ -49,7 +49,7 @@ router.post('/userLogin',(req,res,next)=>{
   api.userLogin(req,res,next);
 })
 
-router.get('/admin/getArticleByTagId',(req,res,next)=>{
+router.get('/getArticleByTagId',(req,res,next)=>{
   api.getArticleByTagId(req,res,next);
 })
 

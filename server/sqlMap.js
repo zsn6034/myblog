@@ -45,6 +45,7 @@ var sqlMap = {
   },
   tag: {
     queryById: 'SELECT * FROM articles WHERE id=?',
+    queryByTagId: 'SELECT * FROM articles a LEFT JOIN article_tag_join atj ON a.id=atj.article_id WHERE atj.tag_id=?',
     queryByName: 'SELECT * FROM tags WHERE name=?',
     queryAll: 'SELECT * FROM tags',
     insert: 'INSERT INTO tags(name) VALUES (?)',

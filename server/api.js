@@ -148,10 +148,17 @@ module.exports = {
     pool.getConnection((err, connection) => {
       let postData = req.body;
       connection.query(sqlMap.tag.delById, [postData.name], (err, result) => {
-        res.json({
-          status: true,
-          msg: '删除成功'
-        })
+        if (err) {
+          res.json({
+            status: false,
+            msg: '删除失败'
+          })
+        } else {
+          res.json({
+            status: true,
+            msg: '删除成功'
+          })
+        }
         connection.release();
       })
     })
@@ -191,7 +198,7 @@ module.exports = {
   getArticleByTagId(req, res, next) {
     let postData = req.query;
     pool.getConnection((err, connection) => {
-      connection.query(sqlMap.tag.queryById, [postData.id], (err, result) => {
+      connection.query(sqlMap.tag.queryByTagId, [postData.id], (err, result) => {
         res.json(result);
         connection.release();
       })
